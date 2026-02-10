@@ -44,6 +44,29 @@ nodejs_setup(){
 
 }
 
+java_setup(){
+    dnf install maven -y &>>$LOGS_FILE
+    VALIDATE $? "Installing Maven"
+
+    cd /app
+
+    mvn clean package &>>$LOGS_FILE
+    VALIDATE $? "Installing and Building $component"
+
+    mv target/$component-1.0.jar $component.jar 
+    VALIDATE $? "Moving and Renaming $component"
+
+}
+
+python_setup(){
+    dnf install python3 gcc python3-devel -y &>>$LOGS_FILE
+    VALIDATE $? "Installing Python"
+
+    cd /app 
+    pip3 install -r requirements.txt &>>$LOGS_FILE
+    VALIDATE $? "Installing dependencies"
+}
+
 app_setup(){
 
     id roboshop &>>$LOGS_FILE
@@ -87,3 +110,7 @@ app_restart(){
     VALIDATE $? "Restarting $component"
 }
 
+print_total_time(){
+    END_TIME=$(date +%s)
+    TOTAL_TIME=$(( $END_TIME - $START_TIME ))
+    echo -e "$(date "+%Y-%m-%d %H:%M:%S") | Script execute in: $G $TOTAL_TIME seconds $N" | tee -a $LOGS_FILE
